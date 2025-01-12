@@ -1,0 +1,29 @@
+.env
+
+# Node.js Modules
+/frontend/node_modules
+
+# Svelte Output
+/frontend/.output
+/frontend/.vercel
+/frontend/.netlify
+/frontend/.wrangler
+/frontend/.svelte-kit
+/frontend/build
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment Files
+/frontend/.env
+/frontend/.env.*
+!/frontend/.env.example
+!/frontend/.env.test
+
+# Vite Config Cache
+/frontend/vite.config.js.timestamp-*
+/frontend/vite.config.ts.timestamp-*
+
+
+backend/backend
