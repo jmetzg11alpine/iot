@@ -1,5 +1,13 @@
 git clone --recursive https://github.com/espressif/esp-idf.git
 
+# each new terminal session
 cd esp-idf
 ./install.sh
 . ./export.sh
+
+idf.py create-project
+
+# compile and test while it's connected
+idf.py build flash monitor
+
+ctrl + ] = finish a monitor

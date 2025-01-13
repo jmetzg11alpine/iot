@@ -29,3 +29,6 @@ Thumbs.db
 backend/backend
 
 esp/esp-idf
+
+**/build/
+**/wifi_config.h
