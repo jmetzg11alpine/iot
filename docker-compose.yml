@@ -3,8 +3,8 @@ version: "3.8"
 services:
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./f
+      dockerfile: Dockerfile
     ports:
       - "3000:80" # Map port 3000 on your Raspberry Pi to Nginx's port 80
     restart: unless-stopped
@@ -16,3 +16,20 @@ services:
     ports:
       - "8080:8080" # Map host port 8080 to container port 8080
     restart: unless-stopped
+
+# services:
+#   frontend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.frontend
+#     ports:
+#       - "3000:80" # Map port 3000 on your Raspberry Pi to Nginx's port 80
+#     restart: unless-stopped
+
+#   backend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.backend
+#     ports:
+#       - "8080:8080" # Map host port 8080 to container port 8080
+#     restart: unless-stopped
