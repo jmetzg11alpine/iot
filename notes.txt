@@ -1,0 +1,10 @@
+FRONTEND
+development - python3 -m http.server
+
+BACKEND
+
+HARDWARE
+To get started, you need to set up some environment variables by running:
+
+. /home/jmetzg11/export-esp.sh
+rustup default esp
