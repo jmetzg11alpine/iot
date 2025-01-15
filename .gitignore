@@ -32,3 +32,5 @@ esp/esp-idf
 
 **/build/
 **/wifi_config.h
+
+main

@@ -1,5 +1,4 @@
 const BACKEND_URL = 'http://localhost:8080';
-// const BACKEND_URL = 'http://192.168.1.245:8080';
 
 document.addEventListener('DOMContentLoaded', () => {
   const timeDisplay = document.getElementById('timeDisplay');

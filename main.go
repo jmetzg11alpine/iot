@@ -7,6 +7,14 @@ import (
 )
 
 func main() {
+
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	http.ServeFile(w, r, "frontend/index.html")
+	// })
+
+	fs := http.FileServer(http.Dir("frontend"))
+	http.Handle("/", fs)
+
 	http.HandleFunc("/time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
