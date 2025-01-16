@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.ejs": "html",
+        "*.js": "javascriptreact",
+        "complex": "c",
+        "esp_netdb.h": "c"
+    }
+}

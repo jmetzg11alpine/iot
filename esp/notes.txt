@@ -8,6 +8,8 @@ cd esp-idf
 idf.py create-project
 
 # compile and test while it's connected
+idf.py menuconfig
+idf.py fullclean
 idf.py build flash monitor
 
 ctrl + ] = finish a monitor
