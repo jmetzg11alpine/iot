@@ -8,3 +8,17 @@ To get started, you need to set up some environment variables by running:
 
 . /home/jmetzg11/export-esp.sh
 rustup default esp
+
+
+open firewall:
+sudo ufw allow 8080
+
+docker build -t iot-app .
+docker run -p 8080:8080 iot-app
+
+
+docker image rm -f $(docker image ls -aq)
+docker volume rm $(docker volume ls -q)
+docker network rm $(docker network ls -q)
+docker builder prune -a --force
+docker system prune -a --volumes --force

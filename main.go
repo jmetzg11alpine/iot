@@ -1,16 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
 
 func main() {
-
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.ServeFile(w, r, "frontend/index.html")
-	// })
 
 	fs := http.FileServer(http.Dir("frontend"))
 	http.Handle("/", fs)
@@ -28,6 +26,29 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"time": "%s"}`, currentTime)
+	})
+
+	http.HandleFunc("/connected", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Invalided request method!!", http.StatusMethodNotAllowed)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+			return
+		}
+		defer r.Body.Close()
+
+		fmt.Printf("Received message: %s\n", string(body))
+
+		// Respond with a success message
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		response := map[string]string{"status": "success"}
+		json.NewEncoder(w).Encode(response)
+
 	})
 
 	fmt.Println("server is running on http://localhost:8080")
