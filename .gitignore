@@ -1,10 +1,7 @@
-
-
-
 esp/esp-idf
 
 **/build/
-**/wifi_config.h
+**/wifi_credentials.h
 
 main
 
