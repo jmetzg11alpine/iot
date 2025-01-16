@@ -6,3 +6,5 @@ esp/esp-idf
 main
 
 fly.toml
+
+fly_io_ca.pem

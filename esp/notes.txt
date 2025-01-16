@@ -13,3 +13,5 @@ idf.py fullclean
 idf.py build flash monitor
 
 ctrl + ] = finish a monitor
+
+xxd -i fly_io_ca.pem > fly_io_ca_pem.h

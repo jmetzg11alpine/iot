@@ -3,12 +3,12 @@
 #include "esp_event.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
-#include "esp_ping.h"
 #include "esp_netif.h"
-#include "ping/ping_sock.h"
+#include "esp_http_client.h"
 #include "wifi_credentials.h"
+#include "fly_io_ca_pem.h"
 
-static const char *TAG = "PING";
+static const char *TAG = "HTTPS";
 
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
@@ -54,70 +54,81 @@ void wifi_init(void)
     esp_wifi_connect();
 }
 
-void on_ping_success(esp_ping_handle_t hdl, void *args)
+esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
-    uint32_t elapsed_time;
-    ip_addr_t target_addr;
-
-    // Get the elapsed time
-    if (esp_ping_get_profile(hdl, ESP_PING_PROF_TIMEGAP, &elapsed_time, sizeof(uint32_t)) != ESP_OK)
+    switch (evt->event_id)
     {
-        ESP_LOGE(TAG, "Failed to get ping time.");
-        return;
-    }
-
-    // Get the target address
-    if (esp_ping_get_profile(hdl, ESP_PING_PROF_IPADDR, &target_addr, sizeof(ip_addr_t)) != ESP_OK)
+    case HTTP_EVENT_ERROR:
+        ESP_LOGI(TAG, "HTTP_EVENT_ERROR");
+        break;
+    case HTTP_EVENT_ON_CONNECTED:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_CONNECTED");
+        break;
+    case HTTP_EVENT_HEADER_SENT:
+        ESP_LOGI(TAG, "HTTP_EVENT_HEADER_SENT");
+        break;
+    case HTTP_EVENT_ON_HEADER:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
+        break;
+    case HTTP_EVENT_ON_DATA:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+        if (!esp_http_client_is_chunked_response(evt->client))
+        {
+            // Log the data as a string
+            ESP_LOGI(TAG, "Response: %.*s", evt->data_len, (char *)evt->data);
+        }
+        break;
+    case HTTP_EVENT_ON_FINISH:
+        ESP_LOGI(TAG, "HTTP_EVENT_ON_FINISH");
+        break;
+    case HTTP_EVENT_DISCONNECTED:
+        ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+        break;
+    case HTTP_EVENT_REDIRECT:
     {
-        ESP_LOGE(TAG, "Failed to get ping target address.");
-        return;
+        char redirect_url[256]; // Adjust size if necessary
+        if (esp_http_client_get_url(evt->client, redirect_url, sizeof(redirect_url)) == ESP_OK)
+        {
+            ESP_LOGI(TAG, "HTTP_EVENT_REDIRECT: Redirecting to %s", redirect_url);
+        }
+        else
+        {
+            ESP_LOGE(TAG, "HTTP_EVENT_REDIRECT: Failed to get redirect URL");
+        }
+        break;
     }
-
-    // Log the results
-    ESP_LOGI(TAG, "Ping success: target_addr=" IPSTR ", time=%lu ms",
-             IP2STR(&target_addr.u_addr.ip4), elapsed_time);
+    default:
+        ESP_LOGW(TAG, "Unknown event: %d", evt->event_id);
+        break;
+    }
+    return ESP_OK;
 }
 
-void on_ping_timeout(esp_ping_handle_t hdl, void *args)
+void https_request(void)
 {
-    ip_addr_t target_addr;
-
-    // Get the target address
-    if (esp_ping_get_profile(hdl, ESP_PING_PROF_IPADDR, &target_addr, sizeof(ip_addr_t)) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to get ping target address.");
-        return;
-    }
-
-    // Log the timeout
-    ESP_LOGW(TAG, "Ping timeout: target_addr=" IPSTR, IP2STR(&target_addr.u_addr.ip4));
-}
-
-void on_ping_end(esp_ping_handle_t hdl, void *args)
-{
-    ESP_LOGI(TAG, "Ping session finished.");
-    esp_ping_delete_session(hdl);
-}
-
-void ping_google(void)
-{
-    ip_addr_t target_addr;
-    IP_ADDR4(&target_addr, 8, 8, 8, 8); // Google's public DNS server
-
-    esp_ping_config_t ping_config = ESP_PING_DEFAULT_CONFIG();
-    ping_config.data_size = 32;
-    ping_config.target_addr = target_addr; // Set the target address
-    ping_config.count = 4;                 // Number of ping requests
-
-    esp_ping_callbacks_t cbs = {
-        .on_ping_success = on_ping_success,
-        .on_ping_timeout = on_ping_timeout,
-        .on_ping_end = on_ping_end,
+    esp_http_client_config_t config = {
+        .url = "https://iot-white-pond-1937.fly.dev/time",
+        .cert_pem = (const char *)fly_io_ca_pem,
+        .event_handler = _http_event_handler,
     };
 
-    esp_ping_handle_t ping;
-    ESP_ERROR_CHECK(esp_ping_new_session(&ping_config, &cbs, &ping));
-    esp_ping_start(ping);
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    // Perform the request
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK)
+    {
+        ESP_LOGI(TAG, "HTTPS Status = %d, content_length = %lld",
+                 esp_http_client_get_status_code(client),
+                 esp_http_client_get_content_length(client));
+    }
+    else
+    {
+        ESP_LOGE(TAG, "HTTPS Request failed: %s", esp_err_to_name(err));
+    }
+
+    // Cleanup
+    esp_http_client_cleanup(client);
 }
 
 void on_wifi_connected()
@@ -125,7 +136,7 @@ void on_wifi_connected()
     ESP_LOGI(TAG, "Connected to Wi-Fi. Waiting to stabilize...");
     vTaskDelay(5000 / portTICK_PERIOD_MS); // 5 seconds delay
     ESP_LOGI(TAG, "Starting ping...");
-    ping_google();
+    https_request();
 }
 
 void app_main(void)

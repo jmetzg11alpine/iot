@@ -6,6 +6,7 @@
         "esp_netdb.h": "c",
         "esp_wifi.h": "c",
         "esp_netif.h": "c",
-        "wifi_credentials.h": "c"
+        "wifi_credentials.h": "c",
+        "ping_sock.h": "c"
     }
 }
