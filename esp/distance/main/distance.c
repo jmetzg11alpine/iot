@@ -5,6 +5,7 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_http_client.h"
+#include "esp_sntp.h"
 #include "wifi_credentials.h"
 #include "fly_io_ca_pem.h"
 
@@ -52,6 +53,24 @@ void wifi_init(void)
     esp_wifi_start();
 
     esp_wifi_connect();
+}
+
+void initialize_sntp(void)
+{
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    sntp_setservername(0, "pool.ntp.org");
+    sntp_init();
+
+    // Wait until the time is synchronized
+    time_t now = 0;
+    struct tm timeinfo = {0};
+    while (timeinfo.tm_year < (2016 - 1900))
+    {
+        ESP_LOGI(TAG, "Waiting for system time to be set...");
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        time(&now);
+        localtime_r(&now, &timeinfo);
+    }
 }
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
@@ -108,7 +127,7 @@ void https_request(void)
 {
     esp_http_client_config_t config = {
         .url = "https://iot-white-pond-1937.fly.dev/time",
-        .cert_pem = (const char *)fly_io_ca_pem,
+        .cert_pem = (const char *)isrg_root_x1_pem,
         .event_handler = _http_event_handler,
     };
 
@@ -135,7 +154,7 @@ void on_wifi_connected()
 {
     ESP_LOGI(TAG, "Connected to Wi-Fi. Waiting to stabilize...");
     vTaskDelay(5000 / portTICK_PERIOD_MS); // 5 seconds delay
-    ESP_LOGI(TAG, "Starting ping...");
+    ESP_LOGI(TAG, "Starting HTTPS request...");
     https_request();
 }
 
@@ -153,5 +172,6 @@ void app_main(void)
     ESP_LOGI(TAG, "Waiting for connection...");
     vTaskDelay(5000 / portTICK_PERIOD_MS); // Wait for Wi-Fi connection
 
+    initialize_sntp();
     on_wifi_connected();
 }

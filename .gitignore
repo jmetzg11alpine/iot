@@ -8,3 +8,4 @@ main
 fly.toml
 
 fly_io_ca.pem
+**.pem

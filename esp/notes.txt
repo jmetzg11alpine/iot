@@ -14,4 +14,13 @@ idf.py build flash monitor
 
 ctrl + ] = finish a monitor
 
-xxd -i fly_io_ca.pem > fly_io_ca_pem.h
+
+openssl s_client -connect iot-white-pond-1937.fly.dev:443 -showcerts </dev/null 2>/dev/null | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' > isrg-root-x1.pem
+
+then I kept the one that starts with:
+-----BEGIN CERTIFICATE-----
+MIIEVzCCAj+gAwIBAgIRAIOPbGPOsTmMYgZigxXJ/d4wDQYJKoZIhvcNAQELBQAw
+...
+-----END CERTIFICATE-----
+
+xxd -i isrg-root-x1.pem > fly_io_ca_pem.h
