@@ -1,0 +1,38 @@
+APP
+docker build -t app .
+docker run -it --rm -p 8080:8080 -p 1883:1883 app
+
+------------------- MOSQUITTO -------------------
+make certs by running bash script
+
+verify it works:
+openssl x509 -in certs/server.crt -text -noout | grep -A 1 "Subject Alternative Name"
+
+
+mosquitto_sub -h localhost -p 8883 --cafile config/certs/ca.crt -t esp32/trigger
+mosquitto_pub -h localhost -p 8883 -- cafile config/certs/ca.crt -t esp32/trigger -m "Hello from Jesse"
+
+mosquitto_sub -h live_url -p 1883 -t esp32/trigger
+mosquitto_pub -h live_url -p 1883 -t esp32/trigger -m "Hello from Fly.io!"
+
+------------------- HARDWARE -------------------
+To get started, you need to set up some environment variables by running:
+
+. /home/jmetzg11/export-esp.sh
+rustup default esp
+
+
+open firewall:
+sudo ufw allow 8080
+
+-------------------  DOCKER -------------------
+
+docker build --no-cache -t iot-app .
+docker run -p 8080:8080 -p 8883:8883 iot-app
+
+docker rm -f $(docker ps -aq)
+docker image rm -f $(docker image ls -aq)
+docker volume rm $(docker volume ls -q)
+docker network rm $(docker network ls -q)
+docker builder prune -a --force
+docker system prune -a --volumes --force
