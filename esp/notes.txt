@@ -7,13 +7,15 @@ cd esp-idf
 
 idf.py create-project
 
-# compile and test while it's connected
+----------------compile and test while it's connected -------------------------
 idf.py menuconfig
 idf.py fullclean
 idf.py build flash monitor
 
 ctrl + ] = finish a monitor
 
+
+-------------------------------- http -------------------------------
 
 openssl s_client -connect iot-white-pond-1937.fly.dev:443 -showcerts </dev/null 2>/dev/null | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' > isrg-root-x1.pem
 
@@ -24,3 +26,8 @@ MIIEVzCCAj+gAwIBAgIRAIOPbGPOsTmMYgZigxXJ/d4wDQYJKoZIhvcNAQELBQAw
 -----END CERTIFICATE-----
 
 xxd -i isrg-root-x1.pem > fly_io_ca_pem.h
+
+
+---------- certificate for mqtt in the cert directory ---------------
+openssl x509 -in ca.crt -out ca.pem -outform PEM
+xxd -i ca.pem > ca_pem.h

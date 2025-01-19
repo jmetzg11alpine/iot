@@ -9,7 +9,7 @@
 #include "freertos/event_groups.h"
 #include <inttypes.h>
 #include "wifi_credentials.h"
-#include "fly_io_ca_pem.h"
+#include "ca_pem.h"
 
 static const char *WIFI_TAG = "WIFI";
 static const char *MQTT_TAG = "MQTT";
@@ -141,14 +141,12 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 void mqtt_init()
 {
     ESP_LOGI(MQTT_TAG, "Initializing MQTT client with broker URI: %s", MQTT_BROKER_URI);
-    ESP_LOGI(MQTT_TAG, "MQTT_BROKER_URI: %s", MQTT_BROKER_URI);
 
     // Correctly initialize the config with nested braces
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker = {
-            .address = {
-                .uri = MQTT_BROKER_URI, // Set the broker URI
-            },
+            .address.uri = MQTT_BROKER_URI,
+            .verification.certificate = (const char *)ca_pem,
         },
         .network = {
             .disable_auto_reconnect = false, // Ensure auto-reconnect is enabled
@@ -183,41 +181,6 @@ void mqtt_init()
     }
 }
 
-#include "esp_log.h"
-#include "lwip/sockets.h"
-
-void test_socket_connection()
-{
-    const char *broker_host = "66.241.125.108";
-    // const char *broker_host = "iot-white-pond-1937.fly.dev";
-    int broker_port = 1883;
-
-    struct sockaddr_in dest_addr;
-    dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(broker_port);
-
-    inet_pton(AF_INET, broker_host, &dest_addr.sin_addr);
-
-    int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (sock < 0)
-    {
-        ESP_LOGE("SOCKET_TEST", "Socket creation failed: errno %d", errno);
-        return;
-    }
-
-    int err = connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-    if (err != 0)
-    {
-        ESP_LOGE("SOCKET_TEST", "Socket connection failed: errno %d", errno);
-    }
-    else
-    {
-        ESP_LOGI("SOCKET_TEST", "Successfully connected to %s:%d", broker_host, broker_port);
-    }
-
-    close(sock);
-}
-
 void app_main(void)
 {
     esp_err_t ret = nvs_flash_init();
@@ -234,8 +197,6 @@ void app_main(void)
 
     initialize_sntp();
     on_wifi_connected();
-
-    test_socket_connection();
 
     mqtt_init();
 }
