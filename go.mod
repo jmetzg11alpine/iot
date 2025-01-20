@@ -1,4 +1,4 @@
-module backend
+module iot
 
 go 1.23
 

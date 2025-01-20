@@ -19,7 +19,7 @@ body {
     text-align: center;
 }
 
-button {
+.first-row-button {
     background-color: #374151;
     color: white;
     padding: 10px 20px;
@@ -29,14 +29,12 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+.first-row-button:hover {
     background-color: #475569;
     /* Darker shade for hover */
 }
 
-
-
-p {
+.first-row-p {
     font-size: 18px;
     margin-top: 20px;
 }

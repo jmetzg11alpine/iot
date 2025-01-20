@@ -4,7 +4,6 @@ const BACKEND_URL = 'https://iot-white-pond-1937.fly.dev';
 document.addEventListener('DOMContentLoaded', () => {
   const fetchTimeButton = document.getElementById('fetchTimeButton');
   const timeDisplay = document.getElementById('timeDisplay');
-
   const fetchDistanceButton = document.getElementById('fetchDistanceButton');
   const distanceDisplay = document.getElementById('distanceDisplay');
 
