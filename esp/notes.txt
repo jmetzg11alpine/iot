@@ -7,6 +7,10 @@ cd esp-idf
 
 idf.py create-project
 
+------------------------ Logs ----------------------------------
+Component config -> Log -> Log Level -> Default log verbosity
+Info for development, no output for deployment
+
 ----------------compile and test while it's connected -------------------------
 idf.py menuconfig
 idf.py fullclean

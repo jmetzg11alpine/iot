@@ -10,7 +10,7 @@ openssl x509 -in certs/server.crt -text -noout | grep -A 1 "Subject Alternative 
 
 
 mosquitto_sub -h localhost -p 8883 --cafile config/certs/ca.crt -t esp32/trigger -d
-mosquitto_pub -h localhost -p 8883 - cafile config/certs/ca.crt -t esp32/trigger -m "Hello from Jesse"
+mosquitto_pub -h localhost -p 8883 --cafile config/certs/ca.crt -t esp32/trigger -m "Hello from Jesse"
 
 mosquitto_sub -h live_url -p 1883 -t esp32/trigger
 mosquitto_pub -h live_url -p 1883 -t esp32/trigger -m "Hello from Fly.io!"
@@ -27,7 +27,7 @@ sudo ufw allow 8080
 
 -------------------  DOCKER -------------------
 
-docker build --no-cache -t iot-app .
+docker build --no-cache -t iot-app -f Dockerfile.dev .
 docker run -p 8080:8080 -p 8883:8883 iot-app
 
 docker rm -f $(docker ps -aq)

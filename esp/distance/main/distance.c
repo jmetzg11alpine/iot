@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "nvs_flash.h"
@@ -7,9 +9,13 @@
 #include "esp_sntp.h"
 #include "mqtt_client.h"
 #include "freertos/event_groups.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
 #include <inttypes.h>
 #include "wifi_credentials.h"
 #include "ca_pem.h"
+#include "esp_timer.h"
 
 static const char *WIFI_TAG = "WIFI";
 static const char *MQTT_TAG = "MQTT";
@@ -58,32 +64,102 @@ void wifi_init(void)
     esp_wifi_connect();
 }
 
-void initialize_sntp(void)
-{
-    esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    esp_sntp_setservername(0, "pool.ntp.org");
-    esp_sntp_init();
-
-    time_t now = 0;
-    struct tm timeinfo = {0};
-    while (timeinfo.tm_year < (2016 - 1900))
-    {
-        ESP_LOGI(WIFI_TAG, "Waiting for system time to be set...");
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-        time(&now);
-        localtime_r(&now, &timeinfo);
-    }
-}
-
 void on_wifi_connected()
 {
     ESP_LOGI(WIFI_TAG, "Connected to Wi-Fi. Waiting to stabilize...");
     vTaskDelay(5000 / portTICK_PERIOD_MS); // 5 seconds delay
 }
 
+#define TRIG_PIN GPIO_NUM_32 // Pin labeled D15
+#define ECHO_PIN GPIO_NUM_33 // Pin labeled D14
+#define TIMEOUT_US 30000     // Timeout in microseconds
+
+// Function to measure distance using the HC-SR04
+float measure_distance()
+{
+    // Send a 20us HIGH pulse on TRIG_PIN
+    gpio_set_level(TRIG_PIN, 1);
+    esp_rom_delay_us(20); // Ensure pulse is long enough
+    gpio_set_level(TRIG_PIN, 0);
+
+    // Wait for the ECHO_PIN to go HIGH
+    int64_t start_time = 0, end_time = 0;
+    int64_t wait_start = esp_timer_get_time();
+    while (gpio_get_level(ECHO_PIN) == 0)
+    {
+        if (esp_timer_get_time() - wait_start > TIMEOUT_US)
+        {
+            return -1.0; // Timeout
+        }
+    }
+    start_time = esp_timer_get_time();
+
+    // Wait for the ECHO_PIN to go LOW
+    wait_start = esp_timer_get_time();
+    while (gpio_get_level(ECHO_PIN) == 1)
+    {
+        if (esp_timer_get_time() - wait_start > TIMEOUT_US)
+        {
+            return -1.0; // Timeout
+        }
+    }
+    end_time = esp_timer_get_time();
+
+    // Calculate the duration in microseconds
+    int64_t duration_us = end_time - start_time;
+
+    // Calculate and return distance in cm
+    if (duration_us > 0 && duration_us < TIMEOUT_US)
+    {
+        return (duration_us / 2.0) * 0.0343;
+    }
+    else
+    {
+        return -1.0; // Invalid measurement
+    }
+}
+
+char *get_distance()
+{
+    // Allocate memory for the result string
+    char *measurements_str = malloc(256);
+    if (!measurements_str)
+    {
+        return NULL;
+    }
+    measurements_str[0] = '\0'; // Initialize the string
+
+    char buffer[16]; // Temporary buffer for each measurement
+
+    for (int i = 0; i < 10; i++)
+    {
+        float distance = measure_distance();
+
+        if (distance >= 0)
+        {
+            snprintf(buffer, sizeof(buffer), "%.2f", distance);
+        }
+        else
+        {
+            snprintf(buffer, sizeof(buffer), "Invalid");
+        }
+
+        strcat(measurements_str, buffer);
+        if (i < 9)
+        {
+            strcat(measurements_str, ", ");
+        }
+        vTaskDelay(pdMS_TO_TICKS(100)); // 100ms delay between measurements
+    }
+
+    ESP_LOGI(MQTT_TAG, "Measurements: [%s]", measurements_str);
+    return measurements_str;
+}
+
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
     esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
+    esp_mqtt_client_handle_t client = (esp_mqtt_client_handle_t)handler_args;
 
     ESP_LOGI(MQTT_TAG, "Event dispatched. Event ID: %d", (int)event_id);
 
@@ -91,7 +167,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(MQTT_TAG, "MQTT_EVENT_CONNECTED");
-        esp_mqtt_client_subscribe(event->client, "esp32/trigger", 0);
+        esp_mqtt_client_subscribe(event->client, MQTT_SUB, 0);
         break;
 
     case MQTT_EVENT_DISCONNECTED:
@@ -110,6 +186,33 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(MQTT_TAG, "MQTT_EVENT_DATA");
         ESP_LOGI(MQTT_TAG, "Topic: %.*s", event->topic_len, event->topic);
         ESP_LOGI(MQTT_TAG, "Data: %.*s", event->data_len, event->data);
+
+        if (strncmp(event->data, "get_distance", event->data_len) == 0)
+        {
+            ESP_LOGI(MQTT_TAG, "Triggering get_distance() function...");
+
+            // Call get_distance and get the result string
+            char *distance_str = get_distance();
+
+            if (distance_str)
+            {
+                int msg_id = esp_mqtt_client_publish(client, MQTT_PUB, distance_str, 0, 1, 0);
+                if (msg_id == -1)
+                {
+                    ESP_LOGE(MQTT_TAG, "Failed to publish message to server/distance");
+                }
+                else
+                {
+                    ESP_LOGI(MQTT_TAG, "Published message to server/distance, msg_id=%d", msg_id);
+                }
+                // Free the allocated memory
+                free(distance_str);
+            }
+            else
+            {
+                ESP_LOGE(MQTT_TAG, "Failed to get distance measurements");
+            }
+        }
         break;
 
     case MQTT_EVENT_ERROR:
@@ -183,6 +286,13 @@ void mqtt_init()
 
 void app_main(void)
 {
+    // Configure TRIG_PIN as output
+    gpio_set_direction(TRIG_PIN, GPIO_MODE_OUTPUT);
+
+    // Configure ECHO_PIN as input with pull-down
+    gpio_set_direction(ECHO_PIN, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(ECHO_PIN, GPIO_PULLDOWN_ONLY);
+
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
@@ -195,7 +305,6 @@ void app_main(void)
     ESP_LOGI(WIFI_TAG, "Waiting for connection...");
     vTaskDelay(5000 / portTICK_PERIOD_MS); // Wait for Wi-Fi connection
 
-    initialize_sntp();
     on_wifi_connected();
 
     mqtt_init();
