@@ -1,0 +1,43 @@
+# .air.toml
+
+# Main configuration
+[build]
+# Command to build the application
+cmd = "go build -o ./tmp/main main.go"
+# Output binary location
+bin = "./tmp/main"
+# Command to run the binary
+full_bin = "./tmp/main"
+
+# Watcher configuration
+[watch]
+# List of directories to watch for changes
+dirs = [
+    ".",
+    "backend",
+    "frontend",
+]
+
+# File patterns to watch
+# Include Go, HTML, CSS, JS, and template files
+include_ext = ["go", "tpl", "tmpl", "html", "css", "js"]
+
+# Files or directories to ignore
+exclude_dir = ["tmp", "config", "esp"]
+
+# Delay before restarting after changes (in milliseconds)
+delay = 1000
+
+# Logging
+[log]
+# Log color
+color = "true"
+# Log file to watch changes
+watcher = "on"
+# Log build process
+build = "on"
+
+# Miscellaneous
+[misc]
+# Clean the build directory before each build
+clean_on_restart = true

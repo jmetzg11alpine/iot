@@ -13,8 +13,7 @@ import (
 
 func ConnectMQTTBroker() mqtt.Client {
 	certpool := x509.NewCertPool()
-	caCertPath := "../config/ca.crt" // Update with your actual CA cert path
-	caCert, err := os.ReadFile(caCertPath)
+	caCert, err := os.ReadFile(CaCertPath)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to load CA certificate: %v", err))
 	}

@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mosquitto
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./config/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+      - ./config/certs/ca.crt:/mosquitto/config/ca.crt
+      - ./config/certs/server.crt:/mosquitto/config/server.crt
+      - ./config/certs/server.key:/mosquitto/config/server.key
+      - ./config/mosquitto.acl:/mosquitto/config/mosquitto.acl
+    command: ["mosquitto", "-c", "/etc/mosquitto/mosquitto.conf"]
+
+  go-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: go-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./main.go:/app/main.go
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+    command: ["air", "-c", "/app/config/.air.toml"]
+    depends_on:
+      - mosquitto

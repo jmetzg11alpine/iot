@@ -15,4 +15,5 @@ fly_io_ca.pem
 **.srl
 **.csr
 **.cnf
+config/certs/ca_pem.h
 backend/secrets.go

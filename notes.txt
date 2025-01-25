@@ -25,9 +25,9 @@ rustup default esp
 open firewall:
 sudo ufw allow 8080
 
--------------------  DOCKER -------------------
+-------------------  DOCKER Development-------------------
 
-docker build --no-cache -t iot-app -f Dockerfile.dev .
+docker compose --no-cache --build
 docker run -p 8080:8080 -p 8883:8883 iot-app
 
 docker rm -f $(docker ps -aq)
