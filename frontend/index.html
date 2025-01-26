@@ -1,33 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Iot</title>
-    <link rel="stylesheet" href="/style.css">
-</head>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
 
-<body>
-    <div id="first-row">
+  <body>
+    <div class="container">
+      <div class="first-row">
         <div>
-            <button class="first-row-button" id="fetchTimeButton">get time</button>
-            <p class='first-row-p' id="timeDisplay"></p>
+          <button class="first-row-button" id="fetchTimeButton">get time</button>
+          <p class="first-row-p" id="timeDisplay"></p>
         </div>
         <div>
-            <button class="first-row-button" id="fetchDistanceButton">get distance</button>
-            <p class='first-row-p' id="distanceDisplay"></p>
+          <button class="first-row-button" id="fetchDistanceButton">get distance</button>
+          <p class="first-row-p" id="distanceDisplay"></p>
         </div>
-    </div>
-    <div id="second-row">
-        <div id="light-buttons">
-            <button class="light-button" data-choice="y">Yellow</button>
-            <button class="light-button" data-choice="g">Grddeen</button>
-            <button class="light-button" data-choice="b">Blues</button>
-            <button class="light-button" data-choice="r">Red</button>
+      </div>
+      <div class="second-row">
+        <div class="light-buttons">
+          <button class="light-button" id="y" data-choice="y">Y</button>
+          <button class="light-button" id="g" data-choice="g">G</button>
+          <button class="light-button" id="b" data-choice="b">B</button>
+          <button class="light-button" id="r" data-choice="r">R</button>
+          <button class="light-button" id="yg" data-choice="yg">YG</button>
+          <button class="light-button" id="yb" data-choice="yb">YB</button>
+          <button class="light-button" id="yr" data-choice="yr">YR</button>
+          <button class="light-button" id="gb" data-choice="gb">GB</button>
+          <button class="light-button" id="gr" data-choice="gr">GR</button>
+          <button class="light-button" id="br" data-choice="br">BR</button>
         </div>
+        <div id="lights-controls">
+          <div id="lights-display"></div>
+          <button id="send-lights">Send</button>
+        </div>
+      </div>
     </div>
+
     <script src="app.js" defer></script>
-</body>
-
+  </body>
 </html>

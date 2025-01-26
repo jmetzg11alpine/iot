@@ -1,25 +1,29 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f9;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f9;
 }
 
-#first-row {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100vh;
 }
 
-#app {
-    text-align: center;
-}
+.first-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20%;
 
-.first-row-button {
+  .first-row-button {
     background-color: #374151;
     color: white;
     padding: 10px 20px;
@@ -27,14 +31,99 @@ body {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
-}
+  }
 
-.first-row-button:hover {
+  .first-row-button:hover {
     background-color: #475569;
-    /* Darker shade for hover */
-}
+  }
 
-.first-row-p {
+  .first-row-p {
     font-size: 18px;
     margin-top: 20px;
+  }
+}
+
+.second-row {
+  width: 100%;
+  margin-bottom: 20%;
+  display: flex;
+  flex-direction: column;
+
+  .light-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+
+    #y {
+      background-color: yellow;
+    }
+    #g {
+      background-color: green;
+      color: white;
+    }
+    #b {
+      background-color: blue;
+      color: white;
+    }
+    #r {
+      background-color: red;
+      color: white;
+    }
+    #yg {
+      background: linear-gradient(45deg, yellow, green);
+    }
+    #yb {
+      background: linear-gradient(45deg, yellow, blue);
+      color: white;
+    }
+    #yr {
+      background: linear-gradient(45deg, yellow, red);
+      color: white;
+    }
+    #gb {
+      background: linear-gradient(45deg, green, blue);
+      color: white;
+    }
+    #gr {
+      background: linear-gradient(45deg, green, red);
+      color: white;
+    }
+    #br {
+      background: linear-gradient(45deg, blue, red);
+      color: white;
+    }
+
+    .light-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .light-button:active {
+    }
+  }
+
+  #lights-controls {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+
+    #lights-display {
+      width: 70%;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #ccc;
+      padding: 3px;
+      text-alight: center;
+    }
+
+    #send-lights:hover {
+      transform: scale(1.1);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    #send-lights:active {
+      transform: scale(0.95);
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+  }
 }

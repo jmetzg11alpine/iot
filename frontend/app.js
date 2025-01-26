@@ -1,11 +1,14 @@
-// const BACKEND_URL = 'http://localhost:8080';
-const BACKEND_URL = 'https://iot-white-pond-1937.fly.dev';
+const BACKEND_URL = 'http://localhost:8080';
+// const BACKEND_URL = 'https://iot-white-pond-1937.fly.dev';
 
 document.addEventListener('DOMContentLoaded', () => {
   const fetchTimeButton = document.getElementById('fetchTimeButton');
   const timeDisplay = document.getElementById('timeDisplay');
+
   const fetchDistanceButton = document.getElementById('fetchDistanceButton');
   const distanceDisplay = document.getElementById('distanceDisplay');
+
+  const lightsDisplay = document.getElementById('lights-display');
 
   async function fetchTime() {
     try {
@@ -34,6 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
       distanceDisplay.textContent = 'code is broken';
     }
   }
+
+  document.querySelectorAll('.light-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const choice = button.dataset.choice;
+      console.log(choice);
+      if (lightsDisplay.textContent) {
+        lightsDisplay.textContent += `-${choice}`;
+      } else {
+        lightsDisplay.textContent = choice;
+      }
+    });
+  });
 
   fetchTimeButton.addEventListener('click', fetchTime);
   fetchDistanceButton.addEventListener('click', fetchDistance);
