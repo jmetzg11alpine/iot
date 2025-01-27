@@ -2,8 +2,8 @@ import { initTimeFeature } from './time.js';
 import { initDistanceFeature } from './distance.js';
 import { initLightFeature } from './lights.js';
 
-const BACKEND_URL = 'http://localhost:8080';
-// const BACKEND_URL = 'https://iot-white-pond-1937.fly.dev';
+// const BACKEND_URL = 'http://localhost:8080';
+const BACKEND_URL = 'https://iot-white-pond-1937.fly.dev';
 
 async function loadComponent(componentPath, targetId) {
   const response = await fetch(componentPath);

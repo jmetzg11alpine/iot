@@ -31,8 +31,8 @@ func DistanceHandler(mqttClient mqtt.Client) http.HandlerFunc {
 		})
 		token.Wait()
 		if token.Error() != nil {
-			http.Error(w, "Failed to subscribe to topic", http.StatusInternalServerError)
-			fmt.Println("Error subscribing to topic:", token.Error())
+			http.Error(w, "Failed to subscribe to server/distance", http.StatusInternalServerError)
+			fmt.Println("Error subscribing to server/distance:", token.Error())
 			return
 		}
 

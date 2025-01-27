@@ -1,3 +1,5 @@
 # Allow all clients to read and write to the topic "esp32/trigger"
 topic readwrite esp32/distance
 topic readwrite server/distance
+
+topic readwrite esp32/lights

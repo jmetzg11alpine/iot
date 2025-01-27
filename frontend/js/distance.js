@@ -1,8 +1,8 @@
-export function initDistanceFeature(BACKEDN_URL) {
+export function initDistanceFeature(BACKEND_URL) {
   const fetchDistanceButton = document.getElementById('fetchDistanceButton');
   const distanceDisplay = document.getElementById('distanceDisplay');
 
-  async function fetchDistance(BACKEND_URL) {
+  async function fetchDistance() {
     try {
       const response = await fetch(`${BACKEND_URL}/distance`);
       if (!response.ok) {

@@ -1,13 +1,15 @@
 {
-    "files.associations": {
-        "*.ejs": "html",
-        "*.js": "javascriptreact",
-        "complex": "c",
-        "esp_netdb.h": "c",
-        "esp_wifi.h": "c",
-        "esp_netif.h": "c",
-        "wifi_credentials.h": "c",
-        "ping_sock.h": "c",
-        "esp_sntp.h": "c"
-    }
+  "files.associations": {
+    "*.ejs": "html",
+    "*.js": "javascriptreact",
+    "*html": "html",
+    "complex": "c",
+    "esp_netdb.h": "c",
+    "esp_wifi.h": "c",
+    "esp_netif.h": "c",
+    "wifi_credentials.h": "c",
+    "ping_sock.h": "c",
+    "esp_sntp.h": "c",
+    "string.h": "c"
+  }
 }
